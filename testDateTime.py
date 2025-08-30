@@ -22,14 +22,14 @@ app.add_middleware(
 
 class Event(BaseModel):
     name: str
-    createdAt: datetime  # parses "2025-08-31T02:30:00.123Z"
+    eventDate: datetime  # parses "2025-08-31T02:30:00.123Z"
 
 list_events = []
 
 @app.post("/test_datetime")
 def test_datetime(event: Event):
     
-    dt = event.createdAt
+    dt = event.eventDate
 
     list_events.append(event)
 
