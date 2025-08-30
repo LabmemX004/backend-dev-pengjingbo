@@ -20,26 +20,41 @@ app.add_middleware(
     allow_headers=["*"],            # allow "Content-Type", "Authorization", etc.
 )
 
-class Event(BaseModel):
-    name: str
+class createEvent(BaseModel):
+    type: str
+    title: str
+    provider: str
+    StartDateAndTime: str
+    lastingTime: float
+    location: str
+    image: str
+    description: str
     eventDate: datetime  # parses "2025-08-31T02:30:00.123Z"
 
 list_events = []
 
 @app.post("/test_datetime")
-def test_datetime(event: Event):
-    
-    dt = event.eventDate
+def test_datetime(event: createEvent):
 
     list_events.append(event)
 
     print(list_events)
 
-    return {"ok": True, "received": event,"name":event.name,"year": dt.year,            # e.g. 2025
-        "month": dt.month,          # 1..12
-        "date": dt.day,             # day of the month
-        "day": dt.strftime("%A"),   # Monday, Tuesday, etc.
-        "time": dt.strftime("%H:%M:%S"),  # 24h time like "14:30:00"
+    return {"ok": True, "received": event,
+        "type": event.type,
+        "title":event.title,
+        "provider": event.provider,
+        "StartDateAndTime": event.StartDateAndTime,
+        "lastingTime": event.lastingTime,
+        "location": event.location,
+        "image": event.image,
+        "description": event.description,
+
+        "year": event.eventDate.year,            # e.g. 2025
+        "month": event.eventDate.month,          # 1..12
+        "date": event.eventDate.day,             # day of the month
+        "day": event.eventDate.strftime("%A"),   # Monday, Tuesday, etc.
+        "time": event.eventDate.strftime("%H:%M:%S"),  # 24h time like "14:30:00"
         }
 
 @app.get("/event_info")
