@@ -3,6 +3,31 @@ from datetime import datetime
 from pydantic import BaseModel
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import os
+
+# 1) Load environment variables from .env file
+load_dotenv()
+
+# 2) Now you can safely read them
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_REGION = os.getenv("AWS_REGION")
+S3_BUCKET = os.getenv("S3_BUCKET")
+
+import boto3
+from botocore.client import Config
+import uuid
+
+s3 = boto3.client(
+    "s3",
+    region_name=AWS_REGION,
+    config=Config(signature_version="s3v4"),
+    aws_access_key_id=AWS_ACCESS_KEY_ID,          # or rely on your profile/instance role
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,  # if using .env
+)
+
+
 
 app = FastAPI()
 
@@ -14,10 +39,10 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,          # or ["*"] if no cookies/credentials
-    allow_credentials=False,        # True only if you send cookies/auth; then don't use "*"
-    allow_methods=["*"],            # or ["GET","POST","PUT","PATCH","DELETE","OPTIONS"]
-    allow_headers=["*"],            # allow "Content-Type", "Authorization", etc.
+    allow_origins=origins,          
+    allow_credentials=False,        
+    allow_methods=["*"],            
+    allow_headers=["*"],            
 )
 
 class createEvent(BaseModel):
@@ -72,3 +97,20 @@ def print_event(num: int):
         return (
             {"list_events[num]": list_events[num]}
         )
+    
+@app.get("/upload_test")
+def upload_test():
+   
+    s3.upload_file("c:\\Users\\JD\\Desktop\\image for test2.png", "myawsbucket-for-event-master-project", "image-for-test2.jpg")
+    
+    return {"ok": True}
+
+@app.get("/test/downloading")
+def download_file():
+    # Ensure the download folder exists
+    download_folder = os.path.join(os.path.dirname(__file__), "download")
+    os.makedirs(download_folder, exist_ok=True)
+    local_path = os.path.join(download_folder, "image-for-test2.jpg")
+    s3.download_file("myawsbucket-for-event-master-project", "image-for-test2.jpg", local_path)
+    return {"ok": True}
+
