@@ -1,7 +1,9 @@
 from datetime import datetime
 from pydantic import BaseModel
 from datetime import datetime
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File, Body
+from ..config import s3
+from ..config import S3_BUCKET
 
 
 
@@ -64,3 +66,47 @@ def print_event(num: int):
             {"list_events[num]": list_events[num]}
         )
     
+
+@router.post("/upload")
+async def upload(file: UploadFile = File(...)):
+    
+    content = await file.read()
+
+    save_path = f"C:\\Users\\JD\\Desktop\\Event master backend\\download\\"
+
+    with open(f"{save_path}{file.filename}", "wb") as fN:
+        fN.write(content)
+    
+
+    return {"ok": "test passed", "filename": file.filename}
+
+@router.post("/upload-url")
+def get_upload_url(filename: str = Body(..., embed=True), content_type: str = Body("image/jpeg", embed=True)):
+    """Generate a presigned upload URL for S3"""
+    url = s3.generate_presigned_url(
+        ClientMethod="put_object",
+        Params={
+            "Bucket": S3_BUCKET,
+            "Key": filename,
+            "ContentType": content_type
+        },
+        ExpiresIn=300  # valid 5 minutes
+    )
+    return {"url": url, "key": filename}
+
+@router.get("/download-url/{filename}")
+def get_download_url(filename: str):
+    """Generate a presigned download URL for a file in S3."""
+    url = s3.generate_presigned_url(
+        ClientMethod="get_object",
+        Params={
+            "Bucket": S3_BUCKET,
+            "Key": filename,
+        },
+        ExpiresIn=300  # URL valid for 5 minutes
+    )
+    return {"url": url}
+
+
+
+
