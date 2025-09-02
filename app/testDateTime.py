@@ -26,7 +26,7 @@ s3 = boto3.client(
     aws_access_key_id=AWS_ACCESS_KEY_ID,          # or rely on your profile/instance role
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,  # if using .env
 )
-
+#///////////////////////////////////////////////////////////////////////////////////////
 
 
 app = FastAPI()
@@ -58,6 +58,8 @@ class createEvent(BaseModel):
 
 list_events = []
 
+
+#////////////////////////////////////////////////////////////////////////////////////////
 @app.post("/test_datetime")
 def test_datetime(event: createEvent):
 
@@ -101,16 +103,17 @@ def print_event(num: int):
 @app.get("/upload_test")
 def upload_test():
    
-    s3.upload_file("c:\\Users\\JD\\Desktop\\image for test2.png", "myawsbucket-for-event-master-project", "image-for-test2.jpg")
+    s3.upload_file("c:\\Users\\JD\\Desktop\\image for test2.png", "myawsbucket-for-event-master-project", "event-master-project-image/image-for-test2.jpg")
     
     return {"ok": True}
 
 @app.get("/test/downloading")
 def download_file():
     # Ensure the download folder exists
-    download_folder = os.path.join(os.path.dirname(__file__), "download")
-    os.makedirs(download_folder, exist_ok=True)
-    local_path = os.path.join(download_folder, "image-for-test2.jpg")
-    s3.download_file("myawsbucket-for-event-master-project", "image-for-test2.jpg", local_path)
+    # download_folder = os.path.join(os.path.dirname(__file__), "download")
+    # os.makedirs(download_folder, exist_ok=True)
+    # local_path = os.path.join(download_folder, "image-for-test2.jpg")
+    imageName = "image for test1.png"
+    s3.download_file("myawsbucket-for-event-master-project", imageName, f"C:\\Users\\JD\\Desktop\\Event master backend\\download\\{imageName}")
     return {"ok": True}
 
