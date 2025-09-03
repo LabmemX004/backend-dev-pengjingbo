@@ -80,19 +80,40 @@ async def upload(file: UploadFile = File(...)):
 
     return {"ok": "test passed", "filename": file.filename}
 
+# @router.post("/upload-url")
+# def get_upload_url(filename: str = Body(..., embed=True), content_type: str = Body("image/jpeg", embed=True)):
+#     """Generate a presigned upload URL for S3"""
+#     url = s3.generate_presigned_url(
+#         ClientMethod="post_object",
+#         Params={
+#             "Bucket": S3_BUCKET,
+#             "Key": filename,
+#             "ContentType": content_type
+#         },
+#         ExpiresIn=300  # valid 5 minutes
+#     )
+#     return {"url": url, "key": filename}
+
 @router.post("/upload-url")
-def get_upload_url(filename: str = Body(..., embed=True), content_type: str = Body("image/jpeg", embed=True)):
-    """Generate a presigned upload URL for S3"""
-    url = s3.generate_presigned_url(
-        ClientMethod="put_object",
-        Params={
-            "Bucket": S3_BUCKET,
-            "Key": filename,
-            "ContentType": content_type
-        },
-        ExpiresIn=300  # valid 5 minutes
+def get_upload_form(
+    filename: str = Body(...),
+    content_type: str = Body(...),
+):
+    print("filename:", filename)
+    print("content_type:", content_type)
+    # return(filename, content_type)
+    presign = s3.generate_presigned_post(
+        Bucket=S3_BUCKET,
+        Key=filename,
+        Fields={"Content-Type": content_type},
+        Conditions=[{"Content-Type": content_type}],
+        ExpiresIn=300,
     )
-    return {"url": url, "key": filename}
+    return presign  # {"url": "...", "fields": {...}}
+
+
+
+
 
 @router.get("/download-url/{filename}")
 def get_download_url(filename: str):

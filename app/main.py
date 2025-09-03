@@ -26,6 +26,10 @@ app.add_middleware(
 app.include_router(s3Test.router)
 app.include_router(eventInfo.router)
 
+@app.get("/")
+def read_root():
+    return {"welcome to Student Event backend"}
+
 
 
 
