@@ -134,7 +134,7 @@ def get_download_url(filename: str):
 @router.get("/images/url")
 def get_presigned_url(key: str = Query(...), ttl: int = 3600):
     try:
-        ttl = max(60, min(ttl, 24*3600))
+        ttl = max(10, min(ttl, 7*24*3600))
         url = s3.generate_presigned_url(
             "get_object",
             Params={"Bucket": S3_BUCKET, "Key": key},
