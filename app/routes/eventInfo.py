@@ -1,9 +1,11 @@
 from datetime import datetime
 from pydantic import BaseModel
 from datetime import datetime
-from fastapi import APIRouter, UploadFile, File, Body
+from fastapi import APIRouter, UploadFile, File, Body,HTTPException, Query
 from ..config import s3
 from ..config import S3_BUCKET
+import time, os
+
 
 
 
@@ -128,6 +130,19 @@ def get_download_url(filename: str):
     )
     return {"url": url}
 
+
+@router.get("/images/url")
+def get_presigned_url(key: str = Query(...), ttl: int = 3600):
+    try:
+        ttl = max(60, min(ttl, 24*3600))
+        url = s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": S3_BUCKET, "Key": key},
+            ExpiresIn=ttl,
+        )
+        return {"url": url, "expiresAt": int(time.time()) + ttl}
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 
 
