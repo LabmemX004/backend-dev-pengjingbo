@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter, UploadFile, File, Body,HTTPException, Query
 from ..config import s3
 from ..config import S3_BUCKET
-import time, os
+import time, os, uuid
 
 
 
@@ -103,10 +103,13 @@ def get_upload_form(
 ):
     print("filename:", filename)
     print("content_type:", content_type)
+    folder = "event-master-project-image"
+    unique_name = f"{folder}/{time.strftime('%Y/%m/%d')}{uuid.uuid4().hex}{content_type}"
+    print("unique_name:", unique_name)
     # return(filename, content_type)
     presign = s3.generate_presigned_post(
         Bucket=S3_BUCKET,
-        Key=filename,
+        Key=unique_name,
         Fields={"Content-Type": content_type},
         Conditions=[{"Content-Type": content_type}],
         ExpiresIn=300,
