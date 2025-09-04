@@ -1,9 +1,13 @@
 from fastapi import FastAPI 
-
 from fastapi.middleware.cors import CORSMiddleware
 from .routes import s3Test
 from .routes import eventInfo
+from . import blueprint
+#from .blueprint.dbConnection import engine, SessionLocal
+from .blueprint.dbBlueprint import engine, SessionLocal 
 
+
+blueprint.dbBlueprint.Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()

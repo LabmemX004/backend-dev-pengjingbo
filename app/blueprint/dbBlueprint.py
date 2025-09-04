@@ -1,16 +1,39 @@
 from datetime import datetime
-from dbConnection import Base
 from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey,func
 from sqlalchemy.orm import relationship
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+from dotenv import load_dotenv
+import os
 
 
+
+load_dotenv()
+
+db_username = os.getenv("db_username")
+db_password = os.getenv("db_password")
+db_hostname = os.getenv("db_hostname")
+db_port = os.getenv("db_port")
+db_database = os.getenv("db_database")
+
+db_url = f"mysql+pymysql://{db_username}:{db_password}@{db_hostname}:{db_port}/{db_database}"
+
+engine = create_engine(db_url)
+
+Base = declarative_base()
+
+Base.metadata.create_all(engine)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+#//////////////////////////////////////////////////////////////////////////////#
 class Users(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True) #int #@unique pk
-    user_name = Column(String) #@unique
-    email = Column(String) #@unique
-    password = Column(String)
+    user_name = Column(String(100),unique=True) #@unique
+    email = Column(String(100),unique=True) #@unique
+    password = Column(String(100))
     
     #optimization
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
@@ -22,7 +45,7 @@ class Event_providers(Base):
     __tablename__ = "event_providers"
 
     id = Column(Integer, primary_key=True, autoincrement=True) #int #@unique pk
-    user_id = Column(Integer,ForeignKey("users.id"), nullable=False)  #int # fk
+    user_id = Column(Integer,ForeignKey("users.id"), nullable=False,unique=True)  #int @unique # fk
 
     #optimization
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
@@ -48,14 +71,14 @@ class Events(Base):
 
     event_provider_id = Column(Integer,ForeignKey("event_providers.id"), nullable=False)  #int # fk
     id = Column(Integer, primary_key=True, autoincrement=True) #int #@unique pk
-    event_type= Column(String)  #str
-    event_title= Column(String)  #str
-    event_provider_name= Column(String)  #str
+    event_type= Column(String(50))  #str
+    event_title= Column(String(50))  #str
+    event_provider_name= Column(String(100))  #str
     event_start_date_and_time= Column(DateTime(timezone=True)) #datetime # parses "2025-08-31T02:30:00.123Z"
-    event_lasting_time= Column(float) #float # in minutes
-    event_location= Column(String)  #str
-    event_imageUrl= Column(String)  #str
-    event_description= Column(String)  #str
+    event_lasting_time= Column(Float) #float # in minutes
+    event_location= Column(String(500))  #str
+    event_imageUrl= Column(String(1000))  #str
+    event_description= Column(String(10000))  #str
 
     event_total_ticket_number= Column(Integer) #int
     event_remaining_ticket_number= Column(Integer) #int
