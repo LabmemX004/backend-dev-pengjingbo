@@ -22,11 +22,13 @@ class Event_providers(Base):
     __tablename__ = "event_providers"
 
     id = Column(Integer, primary_key=True, autoincrement=True) #int #@unique pk
-    user_id = Column(Integer)  #int # fk
+    user_id = Column(Integer,ForeignKey("users.id"), nullable=False)  #int # fk
 
     #optimization
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
 
 
 #//////////////////////////////////////////////////////////////////////////////#
@@ -44,7 +46,7 @@ class Events(Base):
 
     __tablename__ = "events"
 
-    event_provider_id = Column(Integer)  #int # fk
+    event_provider_id = Column(Integer,ForeignKey("event_providers.id"), nullable=False)  #int # fk
     id = Column(Integer, primary_key=True, autoincrement=True) #int #@unique pk
     event_type= Column(String)  #str
     event_title= Column(String)  #str
@@ -68,8 +70,8 @@ class Join_events_info(Base):
     __tablename__ = "join_events_info"
     
     id = Column(Integer, primary_key=True, autoincrement=True) #int #@unique pk
-    user_id = Column(Integer)  #int # fk
-    event_id = Column(Integer)  #int # fk
+    user_id = Column(Integer,ForeignKey("users.id"), nullable=False)  #int # fk
+    event_id = Column(Integer,ForeignKey("events.id"), nullable=False)  #int # fk
 
     #optimization
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
