@@ -17,12 +17,11 @@ class createEvent(BaseModel):
     type: str
     title: str
     provider: str
-    StartDateAndTime: str
+    StartDateAndTime: datetime  # parses "2025-08-31T02:30:00.123Z"
     lastingTime: float
     location: str
     image: str
     description: str
-    eventDate: datetime  # parses "2025-08-31T02:30:00.123Z"
 
 list_events = []
 
@@ -45,11 +44,11 @@ def test_datetime(event: createEvent):
         "image": event.image,
         "description": event.description,
 
-        "year": event.eventDate.year,            # e.g. 2025
-        "month": event.eventDate.month,          # 1..12
-        "date": event.eventDate.day,             # day of the month
-        "day": event.eventDate.strftime("%A"),   # Monday, Tuesday, etc.
-        "time": event.eventDate.strftime("%H:%M:%S"),  # 24h time like "14:30:00"
+        "year": event.StartDateAndTime.year,            # e.g. 2025
+        "month": event.StartDateAndTime.month,          # 1..12
+        "date": event.StartDateAndTime.day,             # day of the month
+        "day": event.StartDateAndTime.strftime("%A"),   # Monday, Tuesday, etc.
+        "time": event.StartDateAndTime.strftime("%H:%M:%S"),  # 24h time like "14:30:00"
         }
 
 @router.get("/event_info")
