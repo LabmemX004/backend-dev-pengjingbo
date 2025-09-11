@@ -46,7 +46,6 @@ class Users(Base):
     user_name = Column(String(100),unique=True,nullable=False) #@unique
     email = Column(String(100),unique=True,nullable=False) #@unique
     hashed_password = Column(String(500),nullable=False)
-    salt = Column(String(500),nullable=False)
     
     #optimization
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

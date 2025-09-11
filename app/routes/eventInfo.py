@@ -1,10 +1,12 @@
 from datetime import datetime
 from pydantic import BaseModel
 from datetime import datetime
-from fastapi import APIRouter, UploadFile, File, Body,HTTPException, Query
+from fastapi import APIRouter, UploadFile, File, Body,HTTPException, Query, Depends
 from ..config import s3
 from ..config import S3_BUCKET
 import time, os, uuid
+from ..blueprint.dbBlueprint import SessionLocal, Events, Users
+from sqlalchemy.orm import Session
 
 
 
@@ -22,17 +24,56 @@ class createEvent(BaseModel):
     location: str
     image: str
     description: str
+    totalTicketNumber: int
 
 list_events = []
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# def make_test_user(db: Session = Depends(get_db)):
+#     db_test_user = Users(
+#         user_name="test_user",
+#         email="acz882024@gmail.com",
+#         hashed_password="hashed_password",
+#     )
+#     db.add(db_test_user)
+#     db.commit()
+
 
 #////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 @router.post("/test_datetime")
-def test_datetime(event: createEvent):
+def test_datetime(event: createEvent,db: Session = Depends(get_db)):
+    
 
-    list_events.append(event)
+    print("Received event:", event)
 
-    print(list_events)
+    db_event = Events(
+        event_provider_id=1,  # Placeholder, replace with actual user ID
+        event_type=event.type,
+        event_title=event.title,
+        event_provider_name=event.provider,
+        showed_event_provider_name=event.provider,
+        event_start_date_and_time=event.StartDateAndTime,
+        event_duration_in_minutes=event.lastingTime,
+        event_location=event.location,
+        event_imageUrl=event.image,
+        event_description=event.description,
+        event_total_ticket_number=event.totalTicketNumber,
+        event_remaining_ticket_number=event.totalTicketNumber,
+        
+    )
+
+    db.add(db_event)
+    db.commit()
+    
 
     return {"ok": True, "received": event,
         "type": event.type,
@@ -146,5 +187,8 @@ def get_presigned_url(key: str = Query(...), ttl: int = 3600):
     except Exception as e:
         raise HTTPException(500, str(e))
 
-
+@router.get("/a_page_of_events")
+def a_page_of_events(db: Session = Depends(get_db)):
+    events = db.query(Events).limit(100).all()
+    return events
 

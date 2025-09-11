@@ -26,6 +26,13 @@ app.add_middleware(
     allow_headers=["*"],            
 )
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 app.include_router(s3Test.router)
 app.include_router(eventInfo.router)
