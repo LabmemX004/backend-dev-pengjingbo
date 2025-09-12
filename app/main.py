@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routes import s3Test
 from .routes import eventInfo
+from .routes import signInAndUp
 from . import blueprint
 #from .blueprint.dbConnection import engine, SessionLocal
 from .blueprint.dbBlueprint import engine, SessionLocal 
@@ -36,6 +37,7 @@ def get_db():
 
 app.include_router(s3Test.router)
 app.include_router(eventInfo.router)
+app.include_router(signInAndUp.router)
 
 @app.get("/")
 def read_root():
