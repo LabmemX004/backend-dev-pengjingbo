@@ -43,6 +43,11 @@ app.include_router(signInAndUp.router)
 def read_root():
     return {"welcome to Student Event backend"}
 
+import redis
+
+r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+print(r.ping())
+
 
 
 
