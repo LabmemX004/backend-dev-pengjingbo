@@ -12,6 +12,10 @@ def create_access_token(*, user_id:int, email:str, username:str, roles:list[str]
         "email": email,
         "username": username,
         "roles": roles,
+        "iat": _now(),
+        "exp": _now() + timedelta(seconds=ACCESS_TTL),
+        "jti": str(uuid.uuid4()),
+        "type": "access",
     }
     return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
