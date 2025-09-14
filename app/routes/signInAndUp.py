@@ -1,10 +1,12 @@
+from urllib import response
 from pydantic import BaseModel
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, HTTPException, Query, Depends, Request, Response
 import smtplib, os, hashlib, random
 import redis
 from sqlalchemy.orm import Session
-from ..blueprint.dbBlueprint import SessionLocal, Users
+from ..blueprint.dbBlueprint import SessionLocal, Users, Roles, User_roles
 import bcrypt
+from ..auth.jwt import ACCESS_TTL, REFRESH_TTL, create_access_token, create_refresh_token, verify_refresh
 
 router = APIRouter()
 
@@ -32,6 +34,7 @@ class SignUpData(BaseModel):
 class SignInData(BaseModel):
     email: str
     passwordPlainText: str
+
 
 class EmailForVerificationCode(BaseModel):
     email: str
@@ -86,12 +89,23 @@ def sign_up(data: SignUpData, db: Session = Depends(get_db)):
         except Exception as e:
             print(f"Error during sign up: {e}")
             return {"status": "signUpFailed"}
-
+        
+        db.refresh(new_user)
+        new_user_role = User_roles(
+            user_id=db.query(Users).filter(Users.email == data.email).first().id,
+            role_id=1 # default: NormalUser
+        )
+        try:
+            db.add(new_user_role)
+            db.commit()
+        except Exception as e:
+            print(f"Error assigning role during sign up: {e}")
+            return {"status": "signUpFailed"}
         print("Verification code is correct.")
         return {"status": "SuccessfullySignedUp"}
     
 @router.post("/signIn")
-def sign_in(data: SignInData, db: Session = Depends(get_db)):
+def sign_in(data: SignInData, response: Response, db: Session = Depends(get_db)):
     print(f"Signing in user with email: {data.email}")
     user = db.query(Users).filter(Users.email == data.email).first()
     try:
@@ -100,7 +114,36 @@ def sign_in(data: SignInData, db: Session = Depends(get_db)):
             return {"status": "emailAndPasswordDoesNotMatch"}
         if bcrypt.checkpw(data.passwordPlainText.encode('utf-8'), user.hashed_password.encode('utf-8')):
             print("Password is correct.")
-            return {"status": "SuccessfullySignedIn", "username": user.user_name}
+
+            db_user_id = user.id
+            db_user_name = user.user_name
+            db_email = user.email
+            db_user_roles = [r[0] for r in db.query(Roles.role_type).join(User_roles).filter(User_roles.user_id == db_user_id).all()]
+
+            access_token = create_access_token(user_id=db_user_id, email=db_email, username=db_user_name, roles=db_user_roles)
+            refresh_token = create_refresh_token(user_id=db_user_id)
+
+            response.set_cookie(
+                key="refresh_token",
+                value=refresh_token,
+                httponly=True,
+                secure=True,              # requires HTTPS in production
+                samesite="lax",           # use "none" if cross-site + HTTPS
+                path="/auth",             # limit cookie scope
+                max_age=REFRESH_TTL,      # seconds (e.g., 14 days)
+            )
+
+            # 4) return access token in JSON
+            return {
+                "access_token": access_token,
+                "token_type": "Bearer",
+                "expires_in": ACCESS_TTL,  # seconds (e.g., 900)
+                "user": {"id": db_user_id, "email": db_email, "username": db_user_name, "roles": db_user_roles},
+            }
+
+            # print(f"User ID: {db_user_id}, Username: {db_user_name}, Email: {db_email}, Roles: {db_user_roles}")
+
+            # return {"status": "SuccessfullySignedIn", "username": user.user_name}
         else:
             print("Password is incorrect.")
             return {"status": "emailAndPasswordDoesNotMatch"}
@@ -108,3 +151,42 @@ def sign_in(data: SignInData, db: Session = Depends(get_db)):
         print(f"Error during sign in: {e}")
         return {"status": "signInFailed"}
     
+
+@router.post("/refresh")
+def refresh(request: Request, response: Response, db: Session = Depends(get_db)):
+    rt = request.cookies.get("refresh_token")
+    if not rt:
+        raise HTTPException(status_code=401, detail="Missing refresh token")
+
+    try:
+        data = verify_refresh(rt)        # validates signature/iss/aud/exp/typ
+        uid = int(data["sub"])
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    user = db.get(Users, uid)
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    roles = [r.role_type for r in user.roles]
+    new_access  = create_access_token(user_id=user.id, email=user.email, username=user.user_name, roles=roles)
+    new_refresh = create_refresh_token(user_id=user.id)  # rotate refresh
+
+    # set rotated refresh cookie
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        path="/auth",
+        max_age=REFRESH_TTL,
+    )
+    return {"access_token": new_access, "token_type": "Bearer", "expires_in": ACCESS_TTL}
+
+# --------- LOGOUT: clear cookie ---------
+@router.post("/logout")
+def logout(response: Response):
+    response.delete_cookie(key="refresh_token", path="/auth")
+    return {"ok": True}
+        
