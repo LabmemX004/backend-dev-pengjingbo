@@ -17,3 +17,6 @@ def download_file():
     imageName = "image for test1.png"
     s3.download_file("myawsbucket-for-event-master-project", imageName, f"C:\\Users\\JD\\Desktop\\Event master backend\\download\\{imageName}")
     return {"ok": True}
+
+
+    

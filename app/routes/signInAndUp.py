@@ -6,7 +6,8 @@ import redis
 from sqlalchemy.orm import Session
 from ..blueprint.dbBlueprint import SessionLocal, Users, Roles, User_roles
 import bcrypt
-from ..auth.jwt import ACCESS_TTL, REFRESH_TTL, create_access_token, create_refresh_token, verify_refresh
+from ..auth.jwt import ACCESS_TTL, create_access_token, decode_access_token
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 router = APIRouter()
 
@@ -121,29 +122,13 @@ def sign_in(data: SignInData, response: Response, db: Session = Depends(get_db))
             db_user_roles = [r[0] for r in db.query(Roles.role_type).join(User_roles).filter(User_roles.user_id == db_user_id).all()]
 
             access_token = create_access_token(user_id=db_user_id, email=db_email, username=db_user_name, roles=db_user_roles)
-            refresh_token = create_refresh_token(user_id=db_user_id)
 
-            response.set_cookie(
-                key="refresh_token",
-                value=refresh_token,
-                httponly=True,
-                secure=True,              # requires HTTPS in production
-                samesite="lax",           # use "none" if cross-site + HTTPS
-                path="/auth",             # limit cookie scope
-                max_age=REFRESH_TTL,      # seconds (e.g., 14 days)
-            )
-
-            # 4) return access token in JSON
             return {
                 "access_token": access_token,
                 "token_type": "Bearer",
-                "expires_in": ACCESS_TTL,  # seconds (e.g., 900)
-                "user": {"id": db_user_id, "email": db_email, "username": db_user_name, "roles": db_user_roles},
+                "expires_in": ACCESS_TTL,  # seconds (900)
+                "user": {"user_id": db_user_id, "email": db_email, "username": db_user_name, "roles": db_user_roles},
             }
-
-            # print(f"User ID: {db_user_id}, Username: {db_user_name}, Email: {db_email}, Roles: {db_user_roles}")
-
-            # return {"status": "SuccessfullySignedIn", "username": user.user_name}
         else:
             print("Password is incorrect.")
             return {"status": "emailAndPasswordDoesNotMatch"}
@@ -151,42 +136,14 @@ def sign_in(data: SignInData, response: Response, db: Session = Depends(get_db))
         print(f"Error during sign in: {e}")
         return {"status": "signInFailed"}
     
+@router.post("/auth")
 
-@router.post("/refresh")
-def refresh(request: Request, response: Response, db: Session = Depends(get_db)):
-    rt = request.cookies.get("refresh_token")
-    if not rt:
-        raise HTTPException(status_code=401, detail="Missing refresh token")
+    
+@router.get("/test/token/{tokenInput}")
+def get_token(tokenInput: str):
+    return decode_access_token(tokenInput)["username"]
 
-    try:
-        data = verify_refresh(rt)        # validates signature/iss/aud/exp/typ
-        uid = int(data["sub"])
-    except Exception:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    
 
-    user = db.get(Users, uid)
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found")
 
-    roles = [r.role_type for r in user.roles]
-    new_access  = create_access_token(user_id=user.id, email=user.email, username=user.user_name, roles=roles)
-    new_refresh = create_refresh_token(user_id=user.id)  # rotate refresh
-
-    # set rotated refresh cookie
-    response.set_cookie(
-        key="refresh_token",
-        value=new_refresh,
-        httponly=True,
-        secure=True,
-        samesite="lax",
-        path="/auth",
-        max_age=REFRESH_TTL,
-    )
-    return {"access_token": new_access, "token_type": "Bearer", "expires_in": ACCESS_TTL}
-
-# --------- LOGOUT: clear cookie ---------
-@router.post("/logout")
-def logout(response: Response):
-    response.delete_cookie(key="refresh_token", path="/auth")
-    return {"ok": True}
         
