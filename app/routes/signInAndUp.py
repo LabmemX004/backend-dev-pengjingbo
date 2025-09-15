@@ -8,6 +8,7 @@ from ..blueprint.dbBlueprint import SessionLocal, Users, Roles, User_roles
 import bcrypt
 from ..auth.jwt import ACCESS_TTL, create_access_token, decode_access_token
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from ..auth.jwt_bearer import get_current_user, jwtBearer
 
 router = APIRouter()
 
@@ -24,6 +25,10 @@ def get_db():
         yield db
     finally:
         db.close()
+
+class TestBearerInput(BaseModel):
+    id: str
+    user_name: str
 
 
 class SignUpData(BaseModel):
@@ -143,6 +148,10 @@ def sign_in(data: SignInData, response: Response, db: Session = Depends(get_db))
 def get_token(tokenInput: str):
     return decode_access_token(tokenInput)["username"]
 
+
+@router.post("/test_post_for_jwt_bearer", dependencies=[Depends(jwtBearer())])
+def test_post_for_jwt_bearer(input:TestBearerInput, user: dict = Depends(get_current_user)):
+    return {"id": input.id, "user_name": input.user_name,"ok": "True", "user": user}
     
 
 

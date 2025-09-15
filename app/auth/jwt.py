@@ -15,7 +15,7 @@ def create_access_token(*, user_id:int, email:str, username:str, roles:list[str]
         "iat": _now(),
         "exp": _now() + timedelta(seconds=ACCESS_TTL),
         "jti": str(uuid.uuid4()),
-        "type": "access",
+        "typ": "access",
     }
     return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
@@ -23,4 +23,19 @@ def decode_access_token(token:str) -> dict:
     return jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
 
 #/////////////////////////////////////////////////////verify access token/////////////////////////////////
-    
+def verify_access_token(token:str) -> dict|str|None:
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        if payload.get("typ") != "access":
+            print("Invalid token type.")
+            return None
+        if payload.get("exp") < datetime.now(timezone.utc).timestamp():
+            print("Token has expired.")
+            return None
+        return payload
+    except jwt.ExpiredSignatureError:
+        print("Token has expired.")
+        return None
+    except jwt.InvalidTokenError:
+        print("Invalid token.")
+        return None
