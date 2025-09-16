@@ -94,6 +94,9 @@ class Booking_ticket_action_info(Base):
     user_id = Column(Integer,ForeignKey("users.id"), nullable=False)  #int # fk
     event_id = Column(Integer,ForeignKey("events.id"), nullable=False)  #int # fk
     status = Column(String(50),nullable=False, default="Booked") #str  # Booked, Cancelled, Attended
+    #added
+    number_of_tickets = Column(Integer,nullable=False, default=1) #int
+    ticket_code = Column(String(100),nullable=False,unique=True) #@unique str
 
     #optimization
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
