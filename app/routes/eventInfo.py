@@ -1,6 +1,5 @@
 from datetime import datetime
 from pydantic import BaseModel
-from datetime import datetime
 from fastapi import APIRouter, UploadFile, File, Body,HTTPException, Query, Depends
 from ..config import s3
 from ..config import S3_BUCKET

@@ -72,7 +72,7 @@ class Events(Base):
     event_title= Column(String(100))  #str
     event_provider_name= Column(String(100))  #str
     showed_event_provider_name= Column(String(100))  #str
-    event_start_date_and_time= Column(DateTime(timezone=True)) #datetime # parses "2025-08-31T02:30:00.123Z"
+    event_start_date_and_time= Column(DateTime(timezone=False)) #datetime # parses "2025-08-31T02:30:00.123Z"
     event_duration_in_minutes= Column(Float) #float # in minutes
     event_location= Column(String(500))  #str
     event_imageUrl= Column(String(1000))  #str
