@@ -5,6 +5,7 @@ from app.routes import bookingTickets
 from .routes import s3Test
 from .routes import eventInfo
 from .routes import signInAndUp
+from .routes import userAccountPageAPI
 from . import blueprint
 #from .blueprint.dbConnection import engine, SessionLocal
 from .blueprint.dbBlueprint import engine, SessionLocal 
@@ -41,6 +42,7 @@ app.include_router(s3Test.router)
 app.include_router(eventInfo.router)
 app.include_router(signInAndUp.router)
 app.include_router(bookingTickets.router)
+app.include_router(userAccountPageAPI.router)
 
 @app.get("/")
 def read_root():

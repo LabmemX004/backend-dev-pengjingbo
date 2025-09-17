@@ -24,15 +24,14 @@ class jwtBearer(HTTPBearer):
             isTokenValid = True
         return isTokenValid
     
-bearer = HTTPBearer()
+bearer = jwtBearer()
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 
-def get_current_user(creds: HTTPAuthorizationCredentials = Depends(bearer)):
-    token = creds.credentials
+def get_current_user(token: str = Depends(bearer)):
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        return payload  # <-- this dict is now your "user object"
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])  # checks exp
+        return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:

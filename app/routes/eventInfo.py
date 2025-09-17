@@ -1,6 +1,8 @@
 from datetime import datetime
 from pydantic import BaseModel
 from fastapi import APIRouter, UploadFile, File, Body,HTTPException, Query, Depends
+
+from app.auth.jwt_bearer import get_current_user, jwtBearer
 from ..config import s3
 from ..config import S3_BUCKET
 import time, os, uuid
@@ -15,6 +17,7 @@ router = APIRouter()
 
 
 class createEvent(BaseModel):
+    user_id: int
     type: str
     title: str
     provider: str
@@ -48,14 +51,14 @@ def get_db():
 
 
 
-@router.post("/test_datetime")
-def test_datetime(event: createEvent,db: Session = Depends(get_db)):
+@router.post("/test_datetime",dependencies=[Depends(jwtBearer())])
+def test_datetime(event: createEvent,db: Session = Depends(get_db),current_user: dict = Depends(get_current_user)):
     
 
     print("Received event:", event)
 
     db_event = Events(
-        event_provider_id=1,  # Placeholder, replace with actual user ID
+        event_provider_id=event.user_id,  #int # fk
         event_type=event.type,
         event_title=event.title,
         event_provider_name=event.provider,
