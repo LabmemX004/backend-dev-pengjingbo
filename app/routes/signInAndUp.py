@@ -13,8 +13,7 @@ from ..auth.jwt_bearer import get_current_user, jwtBearer
 router = APIRouter()
 
 sever = smtplib.SMTP('smtp.gmail.com', 587)
-sever.starttls()
-sever.login(os.getenv("emailSender"), os.getenv("emailPassword"))
+
 #print(os.getenv("emailPassword"))
 
 r = redis.Redis(host=os.getenv("redisURL"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
@@ -62,9 +61,13 @@ def email_for_verification_code(email: EmailForVerificationCode):
     body = "your 6-digit verification code is: " + verification_code + ". It is valid for 10 minutes. If you did not request this code, please ignore this email."
     message = f"Subject: {subject}\n\n{body}"
     try:
+        sever.starttls()
+        sever.login(os.getenv("emailSender"), os.getenv("emailPassword"))
         sever.sendmail(os.getenv("emailSender"), reciverEmail, message)
     except:
         return {"ok": "False"}
+    finally:
+        sever.quit()
     return {"ok": "True"}
 
 @router.post("/signUp")

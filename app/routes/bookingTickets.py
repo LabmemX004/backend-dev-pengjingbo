@@ -13,6 +13,8 @@ import uuid
 # sever.starttls()
 # sever.login(os.getenv("emailSender"), os.getenv("emailPassword"))
 
+
+
 router = APIRouter()
 
 def get_db():
@@ -29,6 +31,7 @@ class BookingTicketData(BaseModel):
 
 @router.post("/bookTicket", dependencies=[Depends(jwtBearer())])
 def book_ticket(booking_data: BookingTicketData, db: Session = Depends(get_db),current_user: dict = Depends(get_current_user)): 
+  
   print(booking_data.user_id)
   try:
     event = db.query(Events).filter(Events.id == booking_data.event_id).first()
@@ -54,10 +57,15 @@ def book_ticket(booking_data: BookingTicketData, db: Session = Depends(get_db),c
     subject = f"Your ticket booking is successful, here is the detial information of event: {event.event_title}"
     body = f"Event: {event.event_title}\nDate and Time: {event.event_start_date_and_time}\nLocation: {event.event_location}\nNumber of Tickets: {booking_data.number_of_tickets}\n\nYour ticket code is:{ticket_code_unique}\n\nThank you for booking with us!"
     message = f"Subject: {subject}\n\n{body}"
+    
     try:
+        sever.starttls()
+        sever.login(os.getenv("emailSender"), os.getenv("emailPassword"))
         sever.sendmail(os.getenv("emailSender"), reciverEmail, message)
     except Exception as e:
         print(f"Failed to send email: {e}")
+    finally:
+        sever.quit()
   except Exception as e:
     db.rollback()
     raise HTTPException(status_code=500, detail=str(e))
