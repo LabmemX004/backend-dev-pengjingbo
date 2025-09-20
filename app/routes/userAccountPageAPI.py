@@ -27,7 +27,8 @@ def get_user_info(user_id: int, db: Session = Depends(get_db),current_user: dict
         "id": user.id,
         "user_name": user.user_name,
         "email": user.email,
-        "roles": user_roles
+        "roles": user_roles,
+        "created_at": user.created_at,
     }
 
 @router.get("/getUserBookedEventsInfo/{user_id}", dependencies=[Depends(jwtBearer())])
