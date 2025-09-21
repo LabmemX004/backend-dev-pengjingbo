@@ -191,6 +191,6 @@ def get_presigned_url(key: str = Query(...), ttl: int = 3600):
 
 @router.get("/a_page_of_events")
 def a_page_of_events(db: Session = Depends(get_db)):
-    events = db.query(Events).limit(100).all()
+    events = db.query(Events).order_by(Events.event_start_date_and_time.desc()).limit(100).all()
     return events
 

@@ -39,32 +39,58 @@ def get_user_booked_events_info(user_id: int, db: Session = Depends(get_db),curr
     if not bookings:
         return {"message": "No bookings found for this user."}
     
-    booked_events_info = []
-    for booking in bookings:
-        event = db.query(Events).filter(Events.id == booking.event_id).first()
-        if event:
-            booked_events_info.append({
-                "booking_id": booking.id,
-                "event_id": event.id,
-                "event_title": event.event_title,
-                "event_type": event.event_type,
-                "event_provider_id": event.event_provider_id,
-                "event_start_date_and_time": event.event_start_date_and_time,
-                "event_lasting_time": event.event_duration_in_minutes,
-                "event_location": event.event_location,
-                "event_image": event.event_imageUrl,
-                "event_description": event.event_description,
-                "number_of_tickets_booked": booking.number_of_tickets,
-                "booking_status": booking.status,
-                "ticket_code": booking.ticket_code
-            })
+    # booked_events_info = []
+    # for booking in bookings:
+    #     event = db.query(Events).filter(Events.id == booking.event_id).first()
+    #     if event:
+    #         booked_events_info.append({
+    #             "booking_id": booking.id,
+    #             "event_id": event.id,
+    #             "event_title": event.event_title,
+    #             "event_type": event.event_type,
+    #             "event_provider_id": event.event_provider_id,
+    #             "event_start_date_and_time": event.event_start_date_and_time,
+    #             "event_lasting_time": event.event_duration_in_minutes,
+    #             "event_location": event.event_location,
+    #             "event_image": event.event_imageUrl,
+    #             "event_description": event.event_description,
+    #             "number_of_tickets_booked": booking.number_of_tickets,
+    #             "booking_status": booking.status,
+    #             "ticket_code": booking.ticket_code
+    #         })
+    rows = (
+        db.query(Booking_ticket_action_info, Events)
+            .join(Events, Events.id == Booking_ticket_action_info.event_id)
+            .filter(Booking_ticket_action_info.user_id == user_id)
+            .order_by(Events.event_start_date_and_time.desc())  # full timestamp DESC (latest/farthest future first)
+            .all()
+    )
+
+    booked_events_info = [
+        {
+            "booking_id": booking.id,
+            "event_id": event.id,
+            "event_title": event.event_title,
+            "event_type": event.event_type,
+            "event_provider_id": event.event_provider_id,
+            "event_start_date_and_time": event.event_start_date_and_time,
+            "event_lasting_time": event.event_duration_in_minutes,
+            "event_location": event.event_location,
+            "event_image": event.event_imageUrl,
+            "event_description": event.event_description,
+            "number_of_tickets_booked": booking.number_of_tickets,
+            "booking_status": booking.status,
+            "ticket_code": booking.ticket_code,
+        }
+        for booking, event in rows
+    ]
     return booked_events_info
 
 @router.get("/getEventsThatProvidedByTheUser/{user_id}", dependencies=[Depends(jwtBearer())])
 def get_events_provided_by_user(user_id: int, db: Session = Depends(get_db),current_user: dict = Depends(get_current_user)):
     if(int(current_user["user_id"]) != user_id):
         raise HTTPException(status_code=403, detail="User ID does not match the token")
-    events = db.query(Events).filter(Events.event_provider_id == user_id).all()
+    events = db.query(Events).filter(Events.event_provider_id == user_id).order_by(Events.event_start_date_and_time.desc()).all()
     if not events:
         return {"message": "No events found for this user."}
     
@@ -80,8 +106,8 @@ def get_events_provided_by_user(user_id: int, db: Session = Depends(get_db),curr
             "event_location": event.event_location,
             "event_image": event.event_imageUrl,
             "event_description": event.event_description,
-            "total_ticket_number": event.event_total_ticket_number,
-            "remaining_ticket_number": event.event_remaining_ticket_number
+            "event_total_ticket_number": event.event_total_ticket_number,
+            "event_remaining_ticket_number": event.event_remaining_ticket_number
         })
     return provided_events_info
 

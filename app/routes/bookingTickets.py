@@ -4,7 +4,6 @@ from fastapi import APIRouter, HTTPException, Query, Depends, Request, Response
 from sqlalchemy.orm import Session
 from ..blueprint.dbBlueprint import SessionLocal, Booking_ticket_action_info, Events, Users
 from ..auth.jwt_bearer import jwtBearer, get_current_user
-from .signInAndUp import sever
 import os
 import uuid
 
@@ -59,6 +58,7 @@ def book_ticket(booking_data: BookingTicketData, db: Session = Depends(get_db),c
     message = f"Subject: {subject}\n\n{body}"
     
     try:
+        sever = smtplib.SMTP('smtp.gmail.com', 587)
         sever.starttls()
         sever.login(os.getenv("emailSender"), os.getenv("emailPassword"))
         sever.sendmail(os.getenv("emailSender"), reciverEmail, message)
