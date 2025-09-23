@@ -37,22 +37,13 @@ def get_db():
     finally:
         db.close()
 
-# def make_test_user(db: Session = Depends(get_db)):
-#     db_test_user = Users(
-#         user_name="test_user",
-#         email="acz882024@gmail.com",
-#         hashed_password="hashed_password",
-#     )
-#     db.add(db_test_user)
-#     db.commit()
-
-
-#////////////////////////////////////////////////////////////////////////////////////////
-
-
-
 @router.post("/test_datetime",dependencies=[Depends(jwtBearer())])
 def test_datetime(event: createEvent,db: Session = Depends(get_db),current_user: dict = Depends(get_current_user)):
+
+    if(int(current_user["user_id"]) != event.user_id):
+        raise HTTPException(status_code=403, detail="User ID does not match the token")
+    if(current_user["roles"].count("EventProvider") == 0):
+        raise HTTPException(status_code=403, detail="User is not an event provider")
     
 
     print("Received event:", event)
@@ -124,25 +115,18 @@ async def upload(file: UploadFile = File(...)):
 
     return {"ok": "test passed", "filename": file.filename}
 
-# @router.post("/upload-url")
-# def get_upload_url(filename: str = Body(..., embed=True), content_type: str = Body("image/jpeg", embed=True)):
-#     """Generate a presigned upload URL for S3"""
-#     url = s3.generate_presigned_url(
-#         ClientMethod="post_object",
-#         Params={
-#             "Bucket": S3_BUCKET,
-#             "Key": filename,
-#             "ContentType": content_type
-#         },
-#         ExpiresIn=300  # valid 5 minutes
-#     )
-#     return {"url": url, "key": filename}
 
-@router.post("/upload-url")
+@router.post("/upload-url",dependencies=[Depends(jwtBearer())])
 def get_upload_form(
     filename: str = Body(...),
     content_type: str = Body(...),
-):
+    current_user: dict = Depends(get_current_user),
+    ):
+    
+    if(current_user["roles"].count("EventProvider") == 0):
+        print("User is not an event provider from upload-url")
+        raise HTTPException(status_code=403, detail="User is not an event provider")
+
     print("filename:", filename)
     print("content_type:", content_type)
     folder = "event-master-project-image"
