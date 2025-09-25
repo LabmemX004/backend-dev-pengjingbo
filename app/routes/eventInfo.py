@@ -85,21 +85,23 @@ def test_datetime(event: createEvent,db: Session = Depends(get_db),current_user:
         "time": event.StartDateAndTime.strftime("%H:%M:%S"),  # 24h time like "14:30:00"
         }
 
-@router.get("/event_info")
-def event_info():
-    return {
-        "count": len(list_events),
-        "events": list_events
-    }
+# check wether this endpoint is needed
+# @router.get("/event_info")
+# def event_info():
+#     return {
+#         "count": len(list_events),
+#         "events": list_events
+#     }
 
-@router.get("/event/{num}")
-def print_event(num: int):
-    if len(list_events) < (num+1) or num <= -1:
-        return {"error": "Invalid event number, try again."}
-    else:
-        return (
-            {"list_events[num]": list_events[num]}
-        )
+# check wether this endpoint is needed
+# @router.get("/event/{num}")
+# def print_event(num: int):
+#     if len(list_events) < (num+1) or num <= -1:
+#         return {"error": "Invalid event number, try again."}
+#     else:
+#         return (
+#             {"list_events[num]": list_events[num]}
+#         )
     
 
 @router.post("/upload")

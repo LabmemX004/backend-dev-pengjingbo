@@ -39,25 +39,6 @@ def get_user_booked_events_info(user_id: int, db: Session = Depends(get_db),curr
     if not bookings:
         return {"message": "No bookings found for this user."}
     
-    # booked_events_info = []
-    # for booking in bookings:
-    #     event = db.query(Events).filter(Events.id == booking.event_id).first()
-    #     if event:
-    #         booked_events_info.append({
-    #             "booking_id": booking.id,
-    #             "event_id": event.id,
-    #             "event_title": event.event_title,
-    #             "event_type": event.event_type,
-    #             "event_provider_id": event.event_provider_id,
-    #             "event_start_date_and_time": event.event_start_date_and_time,
-    #             "event_lasting_time": event.event_duration_in_minutes,
-    #             "event_location": event.event_location,
-    #             "event_image": event.event_imageUrl,
-    #             "event_description": event.event_description,
-    #             "number_of_tickets_booked": booking.number_of_tickets,
-    #             "booking_status": booking.status,
-    #             "ticket_code": booking.ticket_code
-    #         })
     rows = (
         db.query(Booking_ticket_action_info, Events)
             .join(Events, Events.id == Booking_ticket_action_info.event_id)

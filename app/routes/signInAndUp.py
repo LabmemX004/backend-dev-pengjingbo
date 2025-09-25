@@ -143,18 +143,19 @@ def sign_in(data: SignInData, response: Response, db: Session = Depends(get_db))
     except Exception as e:
         print(f"Error during sign in: {e}")
         return {"status": "signInFailed"}
-    
-@router.post("/auth")
 
-    
-@router.get("/test/token/{tokenInput}")
-def get_token(tokenInput: str):
-    return decode_access_token(tokenInput)["username"]
+# check wether this endpoint is needed     
+# @router.post("/auth")
 
 
-@router.post("/test_post_for_jwt_bearer", dependencies=[Depends(jwtBearer())])
-def test_post_for_jwt_bearer(input:TestBearerInput, user: dict = Depends(get_current_user)):
-    return {"id": input.id, "user_name": input.user_name,"ok": "True", "user": user}
+# @router.get("/test/token/{tokenInput}")
+# def get_token(tokenInput: str):
+#     return decode_access_token(tokenInput)["username"]
+
+
+# @router.post("/test_post_for_jwt_bearer", dependencies=[Depends(jwtBearer())])
+# def test_post_for_jwt_bearer(input:TestBearerInput, user: dict = Depends(get_current_user)):
+#     return {"id": input.id, "user_name": input.user_name,"ok": "True", "user": user}
     
 
 

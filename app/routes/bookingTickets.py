@@ -1,17 +1,11 @@
 import smtplib
 from pydantic import BaseModel
-from fastapi import APIRouter, HTTPException, Query, Depends, Request, Response
+from fastapi import APIRouter, HTTPException, Depends, Request, Response
 from sqlalchemy.orm import Session
 from ..blueprint.dbBlueprint import SessionLocal, Booking_ticket_action_info, Events, Users
 from ..auth.jwt_bearer import jwtBearer, get_current_user
 import os
 import uuid
-
-
-# sever = smtplib.SMTP('smtp.gmail.com', 587)
-# sever.starttls()
-# sever.login(os.getenv("emailSender"), os.getenv("emailPassword"))
-
 
 
 router = APIRouter()

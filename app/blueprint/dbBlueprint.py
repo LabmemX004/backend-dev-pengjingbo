@@ -55,15 +55,6 @@ class Users(Base):
 
 class Events(Base):
     
-    # type: str
-    # title: str
-    # provider: str
-    # StartDateAndTime: datetime  # parses "2025-08-31T02:30:00.123Z"
-    # lastingTime: float
-    # location: str
-    # image: str
-    # description: str
-
     __tablename__ = "events"
 
     event_provider_id = Column(Integer,ForeignKey("users.id"), nullable=False)  #int # fk

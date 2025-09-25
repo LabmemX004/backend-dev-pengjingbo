@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import bookingTickets
-from .routes import s3Test
 from .routes import eventInfo
 from .routes import signInAndUp
 from .routes import userAccountPageAPI
@@ -38,7 +37,6 @@ def get_db():
         db.close()
 
 
-app.include_router(s3Test.router)
 app.include_router(eventInfo.router)
 app.include_router(signInAndUp.router)
 app.include_router(bookingTickets.router)
