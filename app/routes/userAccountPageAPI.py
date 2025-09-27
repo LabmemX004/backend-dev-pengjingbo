@@ -37,7 +37,7 @@ def get_user_booked_events_info(user_id: int, db: Session = Depends(get_db),curr
         raise HTTPException(status_code=403, detail="User ID does not match the token")
     bookings = db.query(Booking_ticket_action_info).filter(Booking_ticket_action_info.user_id == user_id).all()
     if not bookings:
-        return {"message": "No bookings found for this user."}
+        return []
     
     rows = (
         db.query(Booking_ticket_action_info, Events)
@@ -73,7 +73,7 @@ def get_events_provided_by_user(user_id: int, db: Session = Depends(get_db),curr
         raise HTTPException(status_code=403, detail="User ID does not match the token")
     events = db.query(Events).filter(Events.event_provider_id == user_id).order_by(Events.event_start_date_and_time.desc()).all()
     if not events:
-        return {"message": "No events found for this user."}
+        return []
     
     provided_events_info = []
     for event in events:
