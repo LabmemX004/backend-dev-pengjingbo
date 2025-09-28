@@ -37,7 +37,7 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/test_datetime",dependencies=[Depends(jwtBearer())])
+@router.post("/pick_datetime",dependencies=[Depends(jwtBearer())])
 def test_datetime(event: createEvent,db: Session = Depends(get_db),current_user: dict = Depends(get_current_user)):
 
     if(int(current_user["user_id"]) != event.user_id):
