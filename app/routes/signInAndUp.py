@@ -15,8 +15,26 @@ router = APIRouter()
 sever = smtplib.SMTP('smtp.gmail.com', 587)
 
 #print(os.getenv("emailPassword"))
+# try:
+#     r = redis.Redis(host="redis", port=6379,db=0, decode_responses=True)
+#     r.ping()
+# except Exception as e:
+#     try:
+#         r = redis.Redis(host=os.getenv("redisURL"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
+#         r.ping()
+#     except Exception as e:
+#         print(f"both redis connection failed: {e}")
 
-r = redis.Redis(host=os.getenv("redisURL"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
+try:
+    r = redis.Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
+    r.ping()
+except Exception as e:
+    try:
+        r = redis.Redis(host=os.getenv("redisURL"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
+        r.ping()
+    except Exception as e:
+        print(f"both redis connection failed: {e}")
+
 
 def get_db():
     db = SessionLocal()

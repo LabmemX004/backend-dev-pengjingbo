@@ -8,6 +8,7 @@ from .routes import userAccountPageAPI
 from . import blueprint
 #from .blueprint.dbConnection import engine, SessionLocal
 from .blueprint.dbBlueprint import engine, SessionLocal 
+import os
 
 
 blueprint.dbBlueprint.Base.metadata.create_all(bind=engine)
@@ -48,8 +49,18 @@ def read_root():
 
 import redis
 
-r = redis.Redis(host="localhost", port=6379, decode_responses=True)
-print(r.ping())
+# r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+# print(r.ping())
+
+try:
+    r = redis.Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
+    r.ping()
+except Exception as e:
+    try:
+        r = redis.Redis(host=os.getenv("redisURL"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
+        r.ping()
+    except Exception as e:
+        print(f"both redis connection failed: {e}")
 
 
 
