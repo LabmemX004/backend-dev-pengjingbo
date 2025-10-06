@@ -11,11 +11,11 @@ import enum
 
 load_dotenv()
 
-db_username = os.getenv("db_username")
-db_password = os.getenv("db_password")
-db_hostname = os.getenv("db_hostname")
-db_port = os.getenv("db_port")
-db_database = os.getenv("db_database")
+db_username = os.getenv("DB_USERNAME")
+db_password = os.getenv("DB_PASSWORD")
+db_hostname = os.getenv("DB_HOSTNAME")
+db_port = os.getenv("DB_PORT")
+db_database = os.getenv("DB_DATABASE")
 
 db_url = f"mysql+pymysql://{db_username}:{db_password}@{db_hostname}:{db_port}/{db_database}"
 

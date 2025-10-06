@@ -54,8 +54,8 @@ def book_ticket(booking_data: BookingTicketData, db: Session = Depends(get_db),c
     try:
         sever = smtplib.SMTP('smtp.gmail.com', 587)
         sever.starttls()
-        sever.login(os.getenv("emailSender"), os.getenv("emailPassword"))
-        sever.sendmail(os.getenv("emailSender"), reciverEmail, message)
+        sever.login(os.getenv("EMAILSENDER"), os.getenv("EMAILPASSWORD"))
+        sever.sendmail(os.getenv("EMAILSENDER"), reciverEmail, message)
     except Exception as e:
         print(f"Failed to send email: {e}")
     finally:

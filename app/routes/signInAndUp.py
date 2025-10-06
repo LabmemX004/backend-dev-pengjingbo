@@ -14,23 +14,23 @@ router = APIRouter()
 
 sever = smtplib.SMTP('smtp.gmail.com', 587)
 
-#print(os.getenv("emailPassword"))
+#print(os.getenv("EMAILPASSWORD"))
 # try:
 #     r = redis.Redis(host="redis", port=6379,db=0, decode_responses=True)
 #     r.ping()
 # except Exception as e:
 #     try:
-#         r = redis.Redis(host=os.getenv("redisURL"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
+#         r = redis.Redis(host=os.getenv("REDISURL"), port=int(os.getenv("REDISPORT")),db=0, decode_responses=True)
 #         r.ping()
 #     except Exception as e:
 #         print(f"both redis connection failed: {e}")
 
 try:
-    r = redis.Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
+    r = redis.Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDISPORT")),db=0, decode_responses=True)
     r.ping()
 except Exception as e:
     try:
-        r = redis.Redis(host=os.getenv("redisURL"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
+        r = redis.Redis(host=os.getenv("REDISURL"), port=int(os.getenv("REDISPORT")),db=0, decode_responses=True)
         r.ping()
     except Exception as e:
         print(f"both redis connection failed: {e}")
@@ -80,8 +80,8 @@ def email_for_verification_code(email: EmailForVerificationCode):
     message = f"Subject: {subject}\n\n{body}"
     try:
         sever.starttls()
-        sever.login(os.getenv("emailSender"), os.getenv("emailPassword"))
-        sever.sendmail(os.getenv("emailSender"), reciverEmail, message)
+        sever.login(os.getenv("EMAILSENDER"), os.getenv("EMAILPASSWORD"))
+        sever.sendmail(os.getenv("EMAILSENDER"), reciverEmail, message)
     except:
         return {"ok": "False"}
     finally:

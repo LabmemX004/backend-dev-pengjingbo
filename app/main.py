@@ -53,11 +53,11 @@ import redis
 # print(r.ping())
 
 try:
-    r = redis.Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
+    r = redis.Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDISPORT")),db=0, decode_responses=True)
     r.ping()
 except Exception as e:
     try:
-        r = redis.Redis(host=os.getenv("redisURL"), port=int(os.getenv("redisPort")),db=0, decode_responses=True)
+        r = redis.Redis(host=os.getenv("REDISURL"), port=int(os.getenv("REDISPORT")),db=0, decode_responses=True)
         r.ping()
     except Exception as e:
         print(f"both redis connection failed: {e}")
