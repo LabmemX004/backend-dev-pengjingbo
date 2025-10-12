@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from urllib import response
 from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException, Query, Depends, Request, Response
@@ -153,6 +154,7 @@ def sign_in(data: SignInData, response: Response, db: Session = Depends(get_db))
                 "access_token": access_token,
                 "token_type": "Bearer",
                 "expires_in": ACCESS_TTL,  # seconds (900)
+                "expireAt": int((datetime.now(timezone.utc) + timedelta(seconds=ACCESS_TTL - 900)).timestamp()), # epoch time in seconds
                 "user": {"user_id": db_user_id, "email": db_email, "username": db_user_name, "roles": db_user_roles},
             }
         else:
