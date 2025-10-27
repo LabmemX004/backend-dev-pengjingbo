@@ -13,7 +13,9 @@ from ..auth.jwt_bearer import get_current_user, jwtBearer
 
 router = APIRouter()
 
-sever = smtplib.SMTP('smtp.gmail.com', 587)
+#Move this into API or have the API check for valid connections before using.
+#Initalization here could cause timeout after lone time inactive.
+sever = smtplib.SMTP('smtp.gmail.com', 587) 
 
 #print(os.getenv("EMAILPASSWORD"))
 # try:
@@ -120,6 +122,8 @@ def sign_up(data: SignUpData, db: Session = Depends(get_db)):
         
         db.refresh(new_user)
         new_user_role = User_roles(
+            # user_id=new_user.id
+            # The refresh already fetches the update. For clarity, avoid fetching again.
             user_id=db.query(Users).filter(Users.email == data.email).first().id,
             role_id=1 # default: NormalUser
         )

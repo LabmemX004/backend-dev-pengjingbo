@@ -14,6 +14,8 @@ def get_db():
     finally:
         db.close()
 
+# wrong intialization, the jwtBearer() should just be the signiture of the jwtBearer().
+# @router.get("/getUserInfo/{user_id}", dependencies=[Depends(jwtBearer)])
 @router.get("/getUserInfo/{user_id}", dependencies=[Depends(jwtBearer())])
 def get_user_info(user_id: int, db: Session = Depends(get_db),current_user: dict = Depends(get_current_user)):
     if(int(current_user["user_id"]) != user_id):
@@ -31,6 +33,8 @@ def get_user_info(user_id: int, db: Session = Depends(get_db),current_user: dict
         "created_at": user.created_at,
     }
 
+# wrong intialization, the jwtBearer() should just be the signiture of the jwtBearer().
+# @router.get("/getUserBookedEventsInfo/{user_id}", dependencies=[Depends(jwtBearer)])
 @router.get("/getUserBookedEventsInfo/{user_id}", dependencies=[Depends(jwtBearer())])
 def get_user_booked_events_info(user_id: int, db: Session = Depends(get_db),current_user: dict = Depends(get_current_user)):
     if(int(current_user["user_id"]) != user_id):
@@ -67,6 +71,8 @@ def get_user_booked_events_info(user_id: int, db: Session = Depends(get_db),curr
     ]
     return booked_events_info
 
+# wrong intialization, the jwtBearer() should just be the signiture of the jwtBearer().
+# @router.get("/getEventsThatProvidedByTheUser/{user_id}", dependencies=[Depends(jwtBearer)])
 @router.get("/getEventsThatProvidedByTheUser/{user_id}", dependencies=[Depends(jwtBearer())])
 def get_events_provided_by_user(user_id: int, db: Session = Depends(get_db),current_user: dict = Depends(get_current_user)):
     if(int(current_user["user_id"]) != user_id):
